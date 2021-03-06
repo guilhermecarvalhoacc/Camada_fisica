@@ -21,17 +21,16 @@ import numpy as np
 
 #use uma das 3 opcoes para atribuir à variável a porta usada
 serialName = "/dev/ttyACM2"           # Ubuntu (variacao de)
-imageR = './img/Pumba.png' 
 imageW = './img/recebidaCopia.jpg'
 def main():
     try:
         #declaramos um objeto do tipo enlace com o nome "com". Essa é a camada inferior à aplicação. Observe que um parametro
         #para declarar esse objeto é o nome da porta.
-        com1 = enlace(serialName)
+        com2 = enlace(serialName)
         
     
         # Ativa comunicacao. Inicia os threads e a comunicação seiral 
-        com1.enable()
+        com2.enable()
         #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
         print('A comunicação foi aberta com sucesso!')
         
@@ -52,26 +51,20 @@ def main():
         #tente entender como o método send funciona!
         #Cuidado! Apenas trasmitimos arrays de bytes! Nao listas!
           
-
-  
-        txBuffer = open(imageR, 'rb').read()
-        com1.sendData(np.asarray(txBuffer))
+        data,tamanho = com2.getData(4)
+        data_inteiro = int.from_bytes(data,byteorder="big")
          
         # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
         # Tente entender como esse método funciona e o que ele retorna
-        txSize = com1.tx.getStatus()
         #Agora vamos iniciar a recepção dos dados. Se algo chegou ao RX, deve estar automaticamente guardado
         #Observe o que faz a rotina dentro do thread RX
         #print um aviso de que a recepção vai começar.
-        print('A recepção vai começar')
         
         #Será que todos os bytes enviados estão realmente guardadas? Será que conseguimos verificar?
         #Veja o que faz a funcao do enlaceRX  getBufferLen
       
         #acesso aos bytes recebidos
-        txLen = len(txBuffer)
-        rxBuffer, nRx = com1.getData(txLen)
-        print("recebeu {}" .format(rxBuffer))
+        rxBuffer,nrxBuffer = com2.getData(data_inteiro)
 
         print('Salvando dados dos arquivos: ')
         f = open(imageW, 'wb')
@@ -82,12 +75,12 @@ def main():
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")
-        com1.disable()
+        com2.disable()
         
     except Exception as erro:
         print("ops! :-\\")
         print(erro)
-        com1.disable()
+        com2.disable()
         
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda

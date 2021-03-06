@@ -20,9 +20,8 @@ import numpy as np
 # se estiver usando windows, o gerenciador de dispositivos informa a porta
 
 #use uma das 3 opcoes para atribuir à variável a porta usada
-serialName = "/dev/ttyACM2"           # Ubuntu (variacao de)
-imageR = './img/Pumba.png' 
-imageW = './img/recebidaCopia.jpg'
+serialName = "/dev/ttyACM3"           # Ubuntu (variacao de)
+imageR = './img/snake.png' 
 def main():
     try:
         #declaramos um objeto do tipo enlace com o nome "com". Essa é a camada inferior à aplicação. Observe que um parametro
@@ -55,11 +54,10 @@ def main():
 
   
         txBuffer = open(imageR, 'rb').read()
-        com1.sendData(np.asarray(txBuffer))
-         
+        
+        
         # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
         # Tente entender como esse método funciona e o que ele retorna
-        txSize = com1.tx.getStatus()
         #Agora vamos iniciar a recepção dos dados. Se algo chegou ao RX, deve estar automaticamente guardado
         #Observe o que faz a rotina dentro do thread RX
         #print um aviso de que a recepção vai começar.
@@ -70,13 +68,13 @@ def main():
       
         #acesso aos bytes recebidos
         txLen = len(txBuffer)
-        rxBuffer, nRx = com1.getData(txLen)
-        print("recebeu {}" .format(rxBuffer))
-
-        print('Salvando dados dos arquivos: ')
-        f = open(imageW, 'wb')
-        f.write(rxBuffer)
-            
+        print(txLen)
+        tamanho_bytes = (txLen).to_bytes(4,byteorder="big")
+        com1.sendData(tamanho_bytes)
+        com1.sendData(txBuffer)
+        
+        Resp = com1.getData(4)
+        
     
         # Encerra comunicação
         print("-------------------------")
