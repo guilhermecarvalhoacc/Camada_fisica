@@ -20,8 +20,8 @@ import numpy as np
 # se estiver usando windows, o gerenciador de dispositivos informa a porta
 
 #use uma das 3 opcoes para atribuir à variável a porta usada
-serialName = "/dev/ttyACM3"           # Ubuntu (variacao de)
-imageR = './img/snake.png' 
+serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
+imageR = 'img/boneco.png' 
 def main():
     try:
         #declaramos um objeto do tipo enlace com o nome "com". Essa é a camada inferior à aplicação. Observe que um parametro
@@ -54,6 +54,18 @@ def main():
 
   
         txBuffer = open(imageR, 'rb').read()
+
+        lista_pacotes = []
+        p = 100
+        inteiro = int(len(txBuffer)/p)
+        resto = len(txBuffer)%p
+        for i in range(0,len(txBuffer),p):
+            lista_pacotes.append(txBuffer[i:i+100])
+            print(i)
+            print("coisei o pacote")
+            print(f"O pacote {i} \n{txBuffer[i:i+100]}\n")
+        print(len(lista_pacotes))
+
         
         
         # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
@@ -69,19 +81,28 @@ def main():
         #acesso aos bytes recebidos
         txLen = len(txBuffer)
         print(txLen)
-        tamanho_bytes = (txLen).to_bytes(4,byteorder="big")
-        com1.sendData(tamanho_bytes)
-        com1.sendData(txBuffer)
+
+        contador = 1
+        for pacote in lista_pacotes:
+            com1.sendData(np.asarray(pacote))
+            time.sleep(0.5)
+            print(f"Pacote {contador} enviado!")
+            contador += 1
+
+        print("Todos os pacotes enviados")
         
-        Resp = com1.getData(4)
+        #Resp = com1.getData(4)
         
     
         # Encerra comunicação
+        tamanho_voltou = com1.tx.getBufferLen()
+        print(tamanho_voltou)
+        #if tamanho_voltou == txLen:
         print("-------------------------")
         print("Comunicação encerrada")
         print("-------------------------")
         com1.disable()
-        
+    
     except Exception as erro:
         print("ops! :-\\")
         print(erro)
