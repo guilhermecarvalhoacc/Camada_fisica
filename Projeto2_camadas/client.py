@@ -54,17 +54,36 @@ def main():
 
   
         txBuffer = open(imageR, 'rb').read()
+        num_bytes = (len(txBuffer)).to_bytes(4, byteorder='big')
+        print(len(txBuffer))
+        com1.sendData(num_bytes)
+        tempo_inicio = time.time()
+        print("deu bom")
+        time.sleep(0.5)
+        rxbuffer, nrxbuffer = com1.getData(4)
+        print(nrxbuffer)
+        print(rxbuffer)
+        print(f"recebi 4 bytes")
+        rxbuffer_inteiro = int.from_bytes(rxbuffer, byteorder='big')
+        print(rxbuffer_inteiro)
+        print(len(txBuffer))
+        if rxbuffer_inteiro == len(txBuffer):
+            tempo_final = time.time()
+            taxa_bytes = len(txBuffer)/(tempo_final-tempo_inicio)   
+            print(f"TAXA DE BYTES: {taxa_bytes}")
+            lista_pacotes = []
+            p = 100
+            inteiro = int(len(txBuffer)/p)
+            resto = len(txBuffer)%p
+            for i in range(0,len(txBuffer),p):
+                lista_pacotes.append(txBuffer[i:i+100])
+                print(i)
+                print("coisei o pacote")
+                print(f"O pacote {i} \n{txBuffer[i:i+100]}\n")
+            print(len(lista_pacotes))
 
-        lista_pacotes = []
-        p = 100
-        inteiro = int(len(txBuffer)/p)
-        resto = len(txBuffer)%p
-        for i in range(0,len(txBuffer),p):
-            lista_pacotes.append(txBuffer[i:i+100])
-            print(i)
-            print("coisei o pacote")
-            print(f"O pacote {i} \n{txBuffer[i:i+100]}\n")
-        print(len(lista_pacotes))
+        else:
+            print("DEU MERDA!")
 
         
         
@@ -95,8 +114,6 @@ def main():
         
     
         # Encerra comunicação
-        tamanho_voltou = com1.tx.getBufferLen()
-        print(tamanho_voltou)
         #if tamanho_voltou == txLen:
         print("-------------------------")
         print("Comunicação encerrada")

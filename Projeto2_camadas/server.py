@@ -35,25 +35,26 @@ def main():
         print('A comunicação foi aberta com sucesso!')
         
         #tamanho = com2.rx.getBufferLen()
-        lista_recebidos = []
 
-        while True:
-            tamanho = com2.rx.getBufferLen()
-            if tamanho != 0:
-                rxBuffer,nrxBuffer = com2.getData(tamanho)
-                print(nrxBuffer)
-                print(rxBuffer)
-            print(tamanho)
+        rxbuffer, nrxbuffer = com2.getData(4)
+        print(f"ESSE AKI EH O RXBUFFER{rxbuffer}")
+        print(len(rxbuffer))
+        print(nrxbuffer)
+        print(f"ESSE AKI EH O NRXBUFFER{nrxbuffer}")
+        print("REcebi 4 bytes")
+        com2.sendData(rxbuffer)
+        print("enviei pro client")
+        valor1 = int.from_bytes(rxbuffer, byteorder='big') 
+        rxBuffer,nrxBuffer = com2.getData(valor1)
+        print("recebi tudo!")
 
        # while tamanho < 760:
         #    tamanho = com2.rx.getBufferLen()
 
-        print(nrxBuffer)
-        print(rxBuffer)
-
+ 
         print('Salvando dados dos arquivos: ')
-        #f = open(imageW, 'wb')
-        #f.write(rxBuffer)
+        f = open(imageW, 'wb')
+        f.write(rxBuffer)
             
     
         # Encerra comunicação
