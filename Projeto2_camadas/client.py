@@ -21,13 +21,17 @@ import numpy as np
 
 #use uma das 3 opcoes para atribuir à variável a porta usada
 serialName = "/dev/ttyACM0"           # Ubuntu (variacao de)
-imageR = 'img/boneco.png' 
+
+#Interface grafica implementada para achar o arquivo img, codigo referente ao stackoverflow.
+from tkinter.filedialog import askopenfilename
+nome_arquivo = askopenfilename()
+print(nome_arquivo)
+imageR = nome_arquivo 
 def main():
     try:
         #declaramos um objeto do tipo enlace com o nome "com". Essa é a camada inferior à aplicação. Observe que um parametro
         #para declarar esse objeto é o nome da porta.
         com1 = enlace(serialName)
-        
     
         # Ativa comunicacao. Inicia os threads e a comunicação seiral 
         com1.enable()
@@ -37,36 +41,29 @@ def main():
         #aqui você deverá gerar os dados a serem transmitidos. 
         #seus dados a serem transmitidos são uma lista de bytes a serem transmitidos. Gere esta lista com o 
         #nome de txBuffer. Esla sempre irá armazenar os dados a serem enviados.
-        
-        #txBuffer = imagem em bytes!
-    
-
-    
-        #faça aqui uma conferência do tamanho do seu txBuffer, ou seja, quantos bytes serão enviados.
-       
-            
-        #finalmente vamos transmitir os tados. Para isso usamos a funçao sendData que é um método da camada enlace.
-        #faça um print para avisar que a transmissão vai começar.
-        print('A transmição vai começar')
-        #tente entender como o método send funciona!
-        #Cuidado! Apenas trasmitimos arrays de bytes! Nao listas!
-          
-
   
         txBuffer = open(imageR, 'rb').read()
         num_bytes = (len(txBuffer)).to_bytes(4, byteorder='big')
+
         print(len(txBuffer))
+
         com1.sendData(num_bytes)
         tempo_inicio = time.time()
+
         print("deu bom")
+
         time.sleep(0.5)
         rxbuffer, nrxbuffer = com1.getData(4)
+
         print(nrxbuffer)
         print(rxbuffer)
         print(f"recebi 4 bytes")
+
         rxbuffer_inteiro = int.from_bytes(rxbuffer, byteorder='big')
+
         print(rxbuffer_inteiro)
         print(len(txBuffer))
+        
         if rxbuffer_inteiro == len(txBuffer):
             tempo_final = time.time()
             taxa_bytes = len(txBuffer)/(tempo_final-tempo_inicio)   

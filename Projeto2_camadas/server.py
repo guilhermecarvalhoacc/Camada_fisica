@@ -37,11 +37,7 @@ def main():
         #tamanho = com2.rx.getBufferLen()
 
         rxbuffer, nrxbuffer = com2.getData(4)
-        print(f"ESSE AKI EH O RXBUFFER{rxbuffer}")
-        print(len(rxbuffer))
-        print(nrxbuffer)
-        print(f"ESSE AKI EH O NRXBUFFER{nrxbuffer}")
-        print("REcebi 4 bytes")
+        print("Recebi 4 bytes")
         com2.sendData(rxbuffer)
         print("enviei pro client")
         valor1 = int.from_bytes(rxbuffer, byteorder='big') 
