@@ -55,10 +55,7 @@ def main():
         resto = len(txBuffer)%p
         for i in range(0,len(txBuffer),p):
             lista_pacotes.append(txBuffer[i:i+100])
-            print(i)
-            print("coisei o pacote")
-            print(f"O pacote {i} \n{txBuffer[i:i+100]}\n")
-        print(len(lista_pacotes))
+            time.sleep(0.2)
         
         tempo_inicio = time.time()
         contador = 1
