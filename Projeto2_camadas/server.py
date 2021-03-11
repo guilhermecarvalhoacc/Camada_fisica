@@ -46,6 +46,9 @@ def main():
         print(f"Valor de rxBuffer{rxBuffer}")
         print("recebi tudo!")
 
+       # while tamanho < 760:
+        #    tamanho = com2.rx.getBufferLen()
+
  
         print('Salvando dados dos arquivos: ')
         f = open(imageW, 'wb')
