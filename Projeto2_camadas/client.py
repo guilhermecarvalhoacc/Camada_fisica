@@ -80,7 +80,7 @@ def main():
             print(len(lista_pacotes))
 
         else:
-            print("DEU MERDA!")
+            print("DEU RUIM!")
 
         
         
