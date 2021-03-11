@@ -88,8 +88,11 @@ def main():
             #if tamanho_voltou == txLen:
             print("-------------------------")
             tempo_final = time.time()
+            tempo_gasto = tempo_final - tempo_inicio
+            print(f"TEMPO GASTO PARA ENVIO E RECEBIMENTO: {tempo_gasto}")
             taxa_bytes = len(txBuffer)/(tempo_final-tempo_inicio)
             print(f"TAXA DE BYTES: {taxa_bytes}")
+            
             print("Comunicação encerrada")
             print("-------------------------")
             com1.disable()
