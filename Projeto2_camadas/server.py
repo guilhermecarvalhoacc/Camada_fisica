@@ -38,14 +38,13 @@ def main():
 
         rxbuffer, nrxbuffer = com2.getData(4)
         print("Recebi 4 bytes")
-        com2.sendData(rxbuffer)
-        print("enviei pro client")
+        #com2.sendData(rxbuffer)
+        #print("enviei pro client")
         valor1 = int.from_bytes(rxbuffer, byteorder='big') 
         rxBuffer,nrxBuffer = com2.getData(valor1)
+        com2.sendData(rxbuffer)
+        print(f"Valor de rxBuffer{rxBuffer}")
         print("recebi tudo!")
-
-       # while tamanho < 760:
-        #    tamanho = com2.rx.getBufferLen()
 
  
         print('Salvando dados dos arquivos: ')

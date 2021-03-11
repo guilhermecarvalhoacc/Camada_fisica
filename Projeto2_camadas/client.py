@@ -44,60 +44,16 @@ def main():
   
         txBuffer = open(imageR, 'rb').read()
         num_bytes = (len(txBuffer)).to_bytes(4, byteorder='big')
-
-        print(len(txBuffer))
-
         com1.sendData(num_bytes)
+
+        lista_pacotes = []
+        p = 100
+        inteiro = int(len(txBuffer)/p)
+        resto = len(txBuffer)%p
+        for i in range(0,len(txBuffer),p):
+            lista_pacotes.append(txBuffer[i:i+100])
+        
         tempo_inicio = time.time()
-
-        print("deu bom")
-
-        time.sleep(0.5)
-        rxbuffer, nrxbuffer = com1.getData(4)
-
-        print(nrxbuffer)
-        print(rxbuffer)
-        print(f"recebi 4 bytes")
-
-        rxbuffer_inteiro = int.from_bytes(rxbuffer, byteorder='big')
-
-        print(rxbuffer_inteiro)
-        print(len(txBuffer))
-        
-        if rxbuffer_inteiro == len(txBuffer):
-            tempo_final = time.time()
-            taxa_bytes = len(txBuffer)/(tempo_final-tempo_inicio)   
-            print(f"TAXA DE BYTES: {taxa_bytes}")
-            lista_pacotes = []
-            p = 100
-            inteiro = int(len(txBuffer)/p)
-            resto = len(txBuffer)%p
-            for i in range(0,len(txBuffer),p):
-                lista_pacotes.append(txBuffer[i:i+100])
-                print(i)
-                print("coisei o pacote")
-                print(f"O pacote {i} \n{txBuffer[i:i+100]}\n")
-            print(len(lista_pacotes))
-
-        else:
-            print("DEU RUIM!")
-
-        
-        
-        # A camada enlace possui uma camada inferior, TX possui um método para conhecermos o status da transmissão
-        # Tente entender como esse método funciona e o que ele retorna
-        #Agora vamos iniciar a recepção dos dados. Se algo chegou ao RX, deve estar automaticamente guardado
-        #Observe o que faz a rotina dentro do thread RX
-        #print um aviso de que a recepção vai começar.
-        print('A recepção vai começar')
-        
-        #Será que todos os bytes enviados estão realmente guardadas? Será que conseguimos verificar?
-        #Veja o que faz a funcao do enlaceRX  getBufferLen
-      
-        #acesso aos bytes recebidos
-        txLen = len(txBuffer)
-        print(txLen)
-
         contador = 1
         for pacote in lista_pacotes:
             com1.sendData(np.asarray(pacote))
@@ -106,16 +62,22 @@ def main():
             contador += 1
 
         print("Todos os pacotes enviados")
+
+        time.sleep(0.5)
         
-        #Resp = com1.getData(4)
+        rxbuffer, nrxbuffer = com1.getData(4) 
+
+        rxbuffer_inteiro = int.from_bytes(rxbuffer, byteorder='big')
         
-    
-        # Encerra comunicação
-        #if tamanho_voltou == txLen:
-        print("-------------------------")
-        print("Comunicação encerrada")
-        print("-------------------------")
-        com1.disable()
+        if rxbuffer_inteiro == len(txBuffer):   
+            print("Recebi mesmo tamanho que enviei!")
+            print("-------------------------")
+            tempo_final = time.time()
+            taxa_bytes = len(txBuffer)/(tempo_final-tempo_inicio)
+            print(f"TAXA DE BYTES: {taxa_bytes}")
+            print("Comunicação encerrada")
+            print("-------------------------")
+            com1.disable()
     
     except Exception as erro:
         print("ops! :-\\")
