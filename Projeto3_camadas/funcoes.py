@@ -1,5 +1,6 @@
 
 import math
+import numpy as np
 
 EOP = 2863311530
 EOP_bytes = (EOP).to_bytes(4, byteorder='big')
@@ -16,9 +17,7 @@ def cria_head(Id,Num_pacotes,tamanho_payload,tipo_msg):
 
 def Datagrama(img):
     lista_datagrama = []
-
     Id = 1
-
     p = 114
     Num_pacotes = math.ceil(len(img)/p)
     Num_pacotes_bytes = (Num_pacotes).to_bytes(2, byteorder='big')
@@ -28,6 +27,7 @@ def Datagrama(img):
 
     for i in range(0,len(img),p):
         Id_byte = (Id).to_bytes(4, byteorder='big')
+        print(f"esse eh o id_byte {Id_byte}")
         payload = img[i:i+p] 
         tamanho_payload = len(payload)
         print(f"esse eh o tamanho do payload:{tamanho_payload}")
@@ -38,10 +38,16 @@ def Datagrama(img):
     return lista_datagrama
 
 
-def Handshake():
-    tipo_msg_handshake = (2).to_bytes(2, byteorder='big')
-    head = cria_head(zero_bytes_id,zero_bytes,zero_bytes,tipo_msg_handshake)
-    return head + EOP_bytes
+
+
+def cria_handshake(is_handshake = False):
+    head = [bytes([0]) for i in range(10)]
+    EOP = [bytes([170]) for i in range(4)]
+    payload = []
+    if is_handshake:
+        head[4] = bytes([2])
+    datagrama = head + payload + EOP
+    return np.asarray(datagrama)
 
 
 

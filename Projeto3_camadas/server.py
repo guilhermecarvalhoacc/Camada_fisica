@@ -10,9 +10,12 @@
 #para acompanhar a execução e identificar erros, construa prints ao longo do código! 
 
 
+from math import ceil
+from os import sendfile
 from enlace import *
 import time
 import numpy as np
+from funcoes import *
 
 # voce deverá descomentar e configurar a porta com através da qual ira fazer comunicaçao
 #   para saber a sua porta, execute no terminal :
@@ -28,13 +31,25 @@ def main():
         #para declarar esse objeto é o nome da porta.
         com2 = enlace(serialName)
         
-    
+
+        certo = (9).to_bytes(2, byteorder='big')
+        print(f"ESSE AKI EH O CERTO: {certo}")
+        errado = (7).to_bytes(2, byteorder='big')
+
+        confirmacao = cria_head(zero_bytes_id,zero_bytes,zero_bytes,certo) + EOP_bytes
+        print(f"ESSE AKI EH A CONFIRMAÇÃO: {confirmacao}")
+        negacao = cria_head(zero_bytes_id,zero_bytes,zero_bytes,errado) + EOP_bytes
+
         # Ativa comunicacao. Inicia os threads e a comunicação seiral 
         com2.enable()
         #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
         print('A comunicação foi aberta com sucesso!')
         
         recebe_handshake = com2.getData(14)[0]
+        print("Recebeu hankdshake")
+        time.sleep(0.2)
+        com2.sendData(cria_handshake(is_handshake=True))
+        print("enviando resposta")
         print("recebeu handshake")
         print(f"esse eh o hankdshake: {recebe_handshake}")
         tipo_msg_handshake = recebe_handshake[8:10]
@@ -47,7 +62,9 @@ def main():
 
         comando = True
         lista_payload = bytearray()
+        id_pacote = 1
         while comando:
+            id_byte = (1).to_bytes(4, byteorder='big')
             time.sleep(0.5)
             recebe_head = com2.getData(10)[0]
             print(recebe_head)
@@ -60,15 +77,39 @@ def main():
 
             tamanho_payload_int = int.from_bytes(recebe_tamanho_payload, byteorder='big')
             print(f"esse eh o tamanho do payload em inteiro:{tamanho_payload_int}")
-            recebe_payload = com2.getData(tamanho_payload_int)[0]
+            recebe_payload = com2.getData(tamanho_payload_int - 1)[0]
             recebe_EOP = com2.getData(4)[0]
             print(f"esse eh o EOP: {recebe_EOP}")
             lista_payload.extend(recebe_payload)
             recebe_id_int  = int.from_bytes(recebe_id, byteorder='big')
             recebe_num_pacotes_int  = int.from_bytes(recebe_num_pacotes, byteorder='big')
+
+            print(f"Esse eh o id do pacote em int{recebe_id_int}")
+            print(id_pacote)
+            if recebe_id_int != id_pacote:
+                com2.sendData(negacao) #msg de erro enviada para client solicitando reenvio.
+                print("id do pacote diferente")
+
+            else:
+                if len(recebe_payload) != tamanho_payload_int:
+                    print("taanho do payload nao foi igual nao oh")
+                    com2.sendData(negacao)
+
+                else:
+                    if recebe_EOP != EOP_bytes:
+                        print("eop nao foi igual nao")
+                        com2.sendData(negacao)
+
+                    else:
+                        com2.sendData(confirmacao)
+                        print("Tudo certo meu patrão, por enquanto né")
+                        id_pacote += 1
+
             if recebe_id_int == recebe_num_pacotes_int:
+                print("Ultimo pacote recebido!")
                 comando = False
-            
+
+
         print("saiu do loop")
         print(lista_payload)
 

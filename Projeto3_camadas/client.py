@@ -30,35 +30,58 @@ nome_arquivo = askopenfilename()
 print(nome_arquivo)
 imageR = nome_arquivo 
 
+certo = (9).to_bytes(2, byteorder='big')
+errado =(7).to_bytes(2, byteorder='big')
 
 def main():
     try:
-        #declaramos um objeto do tipo enlace com o nome "com". Essa é a camada inferior à aplicação. Observe que um parametro
-        #para declarar esse objeto é o nome da porta.
+
+
         com1 = enlace(serialName)
     
-        # Ativa comunicacao. Inicia os threads e a comunicação seiral 
         com1.enable()
-        #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
+
         print('A comunicação foi aberta com sucesso!')
         
-        #aqui você deverá gerar os dados a serem transmitidos. 
-        #seus dados a serem transmitidos são uma lista de bytes a serem transmitidos. Gere esta lista com o 
-        #nome de txBuffer. Esla sempre irá armazenar os dados a serem enviados.
-  
         txBuffer = open(imageR, 'rb').read()
 
-        #print(len(txBuffer))
-        com1.sendData(Handshake())
+        com1.sendData(cria_handshake(is_handshake=True))
+        time_start = time.time()
+        time.sleep(0.2)
+        recebeu_resp_servidor = False
+        while not recebeu_resp_servidor:
+            time_over = time.time()
+            if (time_over - time_start) >=5:
+                mandar_dnv = input("mandar dnv?? (sim/nao): ")
+                if mandar_dnv == "sim":
+                    com1.sendData(cria_handshake(is_handshake=True))
+                    time_start = time.time()
+                elif mandar_dnv == "nao":
+                    print("parar o codigo")
+
+            recebeu_resposta = com1.rx.getBufferLen() != 0
+            if recebeu_resposta == True:
+                recebeu_resp_handshake = com1.getData(14)[0]
+                recebeu_resp_servidor = True
+                print(f"resposta do server:{recebeu_resposta}")
+            
 
         time.sleep(0.5)
-        
+
 
         lista_datagrama = Datagrama(txBuffer)
         contador = 1
         for pacote in lista_datagrama:
             com1.sendData(np.asarray(pacote))
+            print(f"ESSE EH O PACOTE:  {pacote}")
             time.sleep(0.5)
+            resposta_total_servidor = com1.getData(14)[0]
+            print(f"ESSA EH A RESPOSTA TOTAL MESMO DO SERVIDOR:{resposta_total_servidor} ")
+            resposta_servidor = resposta_total_servidor[8:10]
+            print(f"ESSA EH A RESPOSTA DO SERVIDOR:{resposta_servidor} ")
+            while resposta_servidor != certo:
+                com1.sendData(np.asarray(pacote))
+                resposta_servidor = com1.getData(14)[0]
             print(f"Pacote {contador} enviado!")
             contador += 1
 
@@ -68,30 +91,6 @@ def main():
 
         time.sleep(0.5)
         
-
-
-        #print(nrxbuffer)
-        #print(rxbuffer)
-        #print(f"recebi 4 bytes")
-
-
-        #print(rxbuffer_inteiro)
-        #print(len(txBuffer))
-        '''
-        if rxbuffer_inteiro == len(txBuffer):   
-            print("Recebi mesmo tamanho que enviei!")
-            # Encerra comunicação
-            #if tamanho_voltou == txLen:
-            print("-------------------------")
-            tempo_final = time.time()
-            tempo_gasto = tempo_final - tempo_inicio
-            print(f"TEMPO GASTO PARA ENVIO E RECEBIMENTO: {tempo_gasto}")
-            taxa_bytes = len(txBuffer)/(tempo_final-tempo_inicio)
-            print(f"TAXA DE BYTES: {taxa_bytes}")
-            
-            print("Comunicação encerrada")
-            print("-------------------------")
-        '''
         com1.disable()
     
     except Exception as erro:
