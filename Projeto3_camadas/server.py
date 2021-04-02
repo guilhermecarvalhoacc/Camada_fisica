@@ -77,7 +77,7 @@ def main():
 
             tamanho_payload_int = int.from_bytes(recebe_tamanho_payload, byteorder='big')
             print(f"esse eh o tamanho do payload em inteiro:{tamanho_payload_int}")
-            recebe_payload = com2.getData(tamanho_payload_int - 1)[0]
+            recebe_payload = com2.getData(tamanho_payload_int)[0]
             recebe_EOP = com2.getData(4)[0]
             print(f"esse eh o EOP: {recebe_EOP}")
             lista_payload.extend(recebe_payload)
