@@ -73,21 +73,22 @@ def main():
         contador = 1
         for pacote in lista_datagrama:
             com1.sendData(np.asarray(pacote))
-            print(f"ESSE EH O PACOTE:  {pacote}")
             time.sleep(0.5)
             resposta_total_servidor = com1.getData(14)[0]
-            print(f"ESSA EH A RESPOSTA TOTAL MESMO DO SERVIDOR:{resposta_total_servidor} ")
             resposta_servidor = resposta_total_servidor[8:10]
-            print(f"ESSA EH A RESPOSTA DO SERVIDOR:{resposta_servidor} ")
+            print(f"RESPOSTA DO SERVIDOR:{resposta_servidor} ")
             while resposta_servidor != certo:
                 com1.sendData(np.asarray(pacote))
                 resposta_servidor = com1.getData(14)[0]
+                print("RECEBEMOS UM PROBLEMA NO ENVIO")
+            print("RECEBEMOS RESPOSTA DE CONFIRMAÇÃO DO SERVIDOR")
             print(f"Pacote {contador} enviado!")
             contador += 1
+        
+        print("-----------------------------------------------")
 
-        print("Todos os pacotes enviados")
+        print("Todos os pacotes enviados com sucesso!")
 
-        print("deu bom")
 
         time.sleep(0.5)
         
